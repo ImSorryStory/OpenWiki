@@ -20,40 +20,38 @@
 
 ##Структура-проекта
 
-└─── docker-compose.yml
-└─── Dockerfile
-└─── README.md
-└─── requirements.txt
-├───app
-│   └─── app.py
-│   └─── models.py
-│   └─── rag.py
-│   └─── utils.py
-│   └─── __init__.py
-│   └───
-│   ├───static
-│   │     └─── script.js
-│   │     └───styles.css
-│   │
-│   ├───templates
-│   │    └─── about.html
-│   │    └─── article_detail.html
-│   │    └─── article_form.html
-│   │    └─── base.html
-│   │    └─── history.html
-│   │    └─── index.html
-│   │    └─── login.html
-│   │    └─── section_detail.html
-│   │    └─── section_form.html
-│   │    └─── subsection_detail.html
-│   │    └─── subsection_form.html
-│   │    └─── trash.html
-│   │
-│   └───uploads
-└───data
-    └─── .db_init.lock
-    └─── lertowiki.db
-    └─── user.txt 
+└─── docker-compose.yml      
+└─── Dockerfile   
+└─── README.md     
+└─── requirements.txt     
+├───app     
+│   └─── app.py     
+│   └─── models.py     
+│   └─── rag.py     
+│   └─── utils.py     
+│   └─── __init__.py     
+│   ├───static   
+│   │     └─── script.js   
+│   │     └───styles.css   
+│   │   
+│   ├───templates   
+│   │    └─── about.html   
+│   │    └─── article_detail.html   
+│   │    └─── article_form.html   
+│   │    └─── base.html   
+│   │    └─── history.html   
+│   │    └─── index.html   
+│   │    └─── login.html   
+│   │    └─── section_detail.html   
+│   │    └─── section_form.html   
+│   │    └─── subsection_detail.html   
+│   │    └─── subsection_form.html   
+│   │    └─── trash.html   
+│   └─── uploads   
+└─── data   
+      └─── .db_init.lock   
+      └─── lertowiki.db   
+      └─── user.txt    
 
 ---
 
