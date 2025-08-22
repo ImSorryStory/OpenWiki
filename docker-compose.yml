@@ -1,0 +1,13 @@
+services:
+  lertowiki:
+    build: .
+    container_name: lertowiki
+    ports:
+      - "8000:8000"
+    environment:
+      - USERS_FILE=/data/user.txt
+      - SECRET_KEY=${SECRET_KEY:-change_me_in_env}
+    volumes:
+      - ./data:/data
+      - ./app/uploads:/app/app/uploads
+    restart: unless-stopped
