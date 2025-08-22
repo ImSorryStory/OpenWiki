@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>История правок: {{ article.title }}</h2>
+<table class="table">
+  <thead><tr><th>#</th><th>Автор</th><th>Когда</th><th>Действия</th></tr></thead>
+  <tbody>
+  {% for r in revisions %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.editor_login }}</td>
+      <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '' }}</td>
+      <td>
+        {% if current_user and current_user.is_admin %}
+        <form method="post" action="{{ url_for('rollback_article', article_id=article.id, rev_id=r.id) }}" onsubmit="return confirm('Откатить к версии #{{ r.id }}?');">
+          <button class="btn danger" type="submit">Откатить</button>
+        </form>
+        {% else %}
+        —
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted">Откат доступен только администратору (логин Admin).</p>
+{% endblock %}

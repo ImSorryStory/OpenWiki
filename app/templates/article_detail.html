@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block breadcrumbs %}<nav class="breadcrumbs">
+  <a href="{{ url_for('index') }}">Главная</a><span class="sep">/</span>
+  <a href="{{ url_for('section_detail', section_id=article.subsection.section.id) }}">Раздел: {{ article.subsection.section.title }}</a><span class="sep">/</span>
+  <a href="{{ url_for('subsection_detail', subsection_id=article.subsection.id) }}">Подраздел: {{ article.subsection.title }}</a><span class="sep">/</span>
+  <span class="current">{{ article.title }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+{% if article.is_deleted %}<div class="flash error">Статья находится в корзине. Только администратор может восстановить или удалить окончательно.</div>{% endif %}
+<div class="header-row">
+  <h2>{{ article.title }}</h2>
+  <div>
+	<form method="post"
+      action="{{ url_for('toggle_favorite', article_id=article.id) }}"
+      style="display:inline">
+	<button class="btn btn-ghost" title="{{ 'Убрать из избранного' if is_fav else 'В избранное' }}">
+    {% if is_fav %}★ Избранное{% else %}☆ В избранное{% endif %}
+	</button>
+	</form>
+    <a class="btn secondary" href="{{ url_for('article_history', article_id=article.id) }}">История</a>
+    <a class="btn" href="{{ url_for('edit_article', article_id=article.id) }}">Редактировать</a>
+    <form method="post" action="{{ url_for('delete_article', article_id=article.id) }}" style="display:inline" onsubmit="return confirm('Переместить статью в корзину?');">
+      <button class="btn danger" type="submit">Удалить</button>
+    </form>
+    {% if current_user and current_user.is_admin and article.is_deleted %}
+    <form method="post" action="{{ url_for('restore_article', article_id=article.id) }}" style="display:inline">
+      <button class="btn secondary" type="submit">Восстановить</button>
+    </form>
+    <form method="post" action="{{ url_for('purge_article', article_id=article.id) }}" style="display:inline" onsubmit="return confirm('Удалить статью навсегда? Это действие необратимо.');">
+      <button class="btn danger" type="submit">Удалить навсегда</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+<p class="muted">Последнее изменение: {{ article.updated_at.strftime('%Y-%m-%d %H:%M') if article.updated_at else '-' }} · {{ article.updated_by_login or article.created_by_login }}</p>
+
+<article class="prose">
+  {{ article.content | safe }}
+</article>
+
+{% if article.attachments %}
+ <div class="attachments-block">
+   <button type="button"
+           class="attachments-toggle"
+           data-target="#attachments-panel-{{ article.id }}"
+           aria-expanded="false"
+           aria-controls="attachments-panel-{{ article.id }}">
+     Вложения <span class="chevron" aria-hidden="true">▾</span>
+   </button>
+
+   <div id="attachments-panel-{{ article.id }}" class="attachments-panel" hidden>
+     <ul class="attachments">
+		{% for att in article.attachments %}
+		<li>
+			<a href="{{ url_for('uploaded_file', filename=att.filename) }}" target="_blank">{{ att.filename }}</a>
+			<span class="muted">({{ att.mime_type or 'file' }}, {{ att.uploaded_by_login }})</span>
+			{% if att.mime_type and 'image' in att.mime_type %}
+			<div class="media-preview"><img src="{{ url_for('uploaded_file', filename=att.filename) }}" alt=""></div>
+			{% elif att.mime_type and 'video' in att.mime_type %}
+			<div class="media-preview"><video src="{{ url_for('uploaded_file', filename=att.filename) }}" controls></video></div>
+			{% elif att.mime_type and 'audio' in att.mime_type %}
+			<div class="media-preview"><audio src="{{ url_for('uploaded_file', filename=att.filename) }}" controls></audio></div>
+			{% endif %}
+		</li>
+		{% endfor %}
+     </ul>
+   </div>
+ </div>
+{% endif %}
+{% endblock %}

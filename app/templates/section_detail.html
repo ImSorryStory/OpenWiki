@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block breadcrumbs %}<nav class="breadcrumbs">
+  <a href="{{ url_for('index') }}">Главная</a><span class="sep">/</span>
+  <span class="current">Раздел: {{ section.title }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="header-row">
+  <h2>Раздел: {{ section.title }}</h2>
+  <div>
+    <a class="btn secondary" href="{{ url_for('edit_section', section_id=section.id) }}">Редактировать</a>
+    <a class="btn" href="{{ url_for('new_subsection', section_id=section.id) }}">+ Подраздел</a>
+  </div>
+</div>
+<p class="muted">{{ section.description }}</p>
+<form method="post" action="{{ url_for('delete_section', section_id=section.id) }}" style="display:inline">
+  <button class="btn danger" type="submit">Удалить раздел</button>
+</form>
+{% if current_user and current_user.is_admin %}
+  <form method="post" action="{{ url_for('restore_section', section_id=section.id) }}" style="display:inline">
+    <button class="btn" type="submit">Восстановить</button>
+  </form>
+  <form method="post" action="{{ url_for('purge_section', section_id=section.id) }}" style="display:inline"
+        onsubmit="return confirm('Удалить раздел окончательно? Действие необратимо.')">
+    <button class="btn ghost" type="submit">Удалить окончательно</button>
+  </form>
+{% endif %}
+
+{% if section.subsections %}
+<table class="table">
+  <thead><tr><th>Подраздел</th><th>Описание</th><th>Статей</th></tr></thead>
+  <tbody>
+    {% for ss in section.subsections %}
+    <tr>
+      <td><a href="{{ url_for('subsection_detail', subsection_id=ss.id) }}">{{ ss.title }}</a></td>
+      <td class="muted">{{ ss.description }}</td>
+      <td>{{ ss.articles|length }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Пока нет подразделов.</p>
+{% endif %}
+{% endblock %}

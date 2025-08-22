@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{% if section %}Редактировать раздел{% else %}Новый раздел{% endif %}</h2>
+<form method="post" class="form">
+  <label>Название</label>
+  <input name="title" value="{{ section.title if section else '' }}" required>
+  <label>Описание</label>
+  <textarea name="description" rows="4">{{ section.description if section else '' }}</textarea>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+{% endblock %}

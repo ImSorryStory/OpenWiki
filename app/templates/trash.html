@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Корзина</h1>
+
+<h2>Разделы</h2>
+<ul>
+  {% for s in sections %}
+    <li>
+      {{ s.title }} — удалён {{ s.deleted_at }}
+      <form method="post" action="{{ url_for('restore_section', section_id=s.id) }}" style="display:inline">
+        <button class="btn">Восстановить</button>
+      </form>
+      <form method="post" action="{{ url_for('purge_section', section_id=s.id) }}" style="display:inline"
+            onsubmit="return confirm('Удалить раздел окончательно?')">
+        <button class="btn ghost">Удалить окончательно</button>
+      </form>
+    </li>
+  {% else %}<li>Пусто</li>{% endfor %}
+</ul>
+
+<h2>Подразделы</h2>
+<ul>
+  {% for ss in subsections %}
+    <li>
+      {{ ss.title }} ({{ ss.section.title if ss.section }}) — удалён {{ ss.deleted_at }}
+      <form method="post" action="{{ url_for('restore_subsection', subsection_id=ss.id) }}" style="display:inline">
+        <button class="btn">Восстановить</button>
+      </form>
+      <form method="post" action="{{ url_for('purge_subsection', subsection_id=ss.id) }}" style="display:inline"
+            onsubmit="return confirm('Удалить подраздел окончательно?')">
+        <button class="btn ghost">Удалить окончательно</button>
+      </form>
+    </li>
+  {% else %}<li>Пусто</li>{% endfor %}
+</ul>
+
+<h2>Статьи</h2>
+<ul>
+  {% for a in articles %}
+    <li>
+      {{ a.title }} — удалена {{ a.deleted_at }}
+      <form method="post" action="{{ url_for('restore_article', article_id=a.id) }}" style="display:inline">
+        <button class="btn">Восстановить</button>
+      </form>
+      <form method="post" action="{{ url_for('purge_article', article_id=a.id) }}" style="display:inline"
+            onsubmit="return confirm('Удалить статью окончательно?')">
+        <button class="btn ghost">Удалить окончательно</button>
+      </form>
+    </li>
+  {% else %}<li>Пусто</li>{% endfor %}
+</ul>
+{% endblock %}

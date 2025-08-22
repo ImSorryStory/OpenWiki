@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>О системе</h2>
+<p>LertoWiki — внутренняя база знаний для команды 3D‑принтеров. Делитесь стандартами сборки, модулями, чек‑листами и обучающими материалами.</p>
+<ul>
+  <li>Разделы → Подразделы → Статьи</li>
+  <li>История правок с указанием автора, времени, возможностью отката (для Admin)</li>
+  <li>Медиа: изображения, видео, аудио</li>
+</ul>
+{% if current_user and current_user.is_admin %}
+<p><a class="btn secondary" href="{{ url_for('admin_trash') }}">Открыть корзину</a></p>
+
+<form method="post" action="{{ url_for('admin_rag_rebuild') }}" onsubmit="return confirm('Пересобрать все RAG-чанки?');">
+  <button class="btn secondary" type="submit">Пересобрать RAG-чанки</button>
+</form>
+{% endif %}
+
+{% endblock %}

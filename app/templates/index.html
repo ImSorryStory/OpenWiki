@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if q %}
+    <h2>Результаты поиска: “{{ q }}”</h2>
+    {% set fav_ids = favorites|map(attribute='id')|list if favorites is defined and favorites else [] %}
+    {% if articles %}
+      <div class="cards">
+        {% for a in articles %}
+        <div class="card">
+          <div class="card-header">
+            {% if a.id in fav_ids %}<span class="fav-star" title="В избранном">★</span>{% endif %}
+            <a href="{{ url_for('article_detail', article_id=a.id) }}">{{ a.title }}</a>
+          </div>
+          <div class="card-body">
+            <p class="muted">Последнее изменение: {{ a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else '-' }} · {{ a.updated_by_login or a.created_by_login }}</p>
+            <p>{{ (a.content|striptags)[:180] }}{% if (a.content|striptags)|length > 180 %}…{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Ничего не найдено.</p>
+    {% endif %}
+  {% else %}
+
+    {% if favorites and favorites|length %}
+      <h2 style="margin:.2rem 0 1rem 0">Избранные</h2>
+      <div class="cards">
+        {% for a in favorites %}
+        <div class="card">
+          <div class="card-header">
+            <span class="fav-star" aria-hidden="true">★</span>
+            <a href="{{ url_for('article_detail', article_id=a.id) }}">{{ a.title }}</a>
+          </div>
+          <div class="card-body">
+            <p class="muted">Обновлено: {{ a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else '-' }} · {{ a.updated_by_login or a.created_by_login }}</p>
+            <p>{{ (a.content|striptags)[:180] }}{% if (a.content|striptags)|length > 180 %}…{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <hr>
+    {% endif %}
+
+    <h2 style="margin:.2rem 0 1rem 0">Недавние статьи</h2>
+    {% if articles %}
+      <div class="cards">
+        {% for a in articles %}
+        <div class="card">
+          <div class="card-header">
+            <a href="{{ url_for('article_detail', article_id=a.id) }}">{{ a.title }}</a>
+          </div>
+          <div class="card-body">
+            <p class="muted">Обновлено: {{ a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else '-' }} · {{ a.updated_by_login or a.created_by_login }}</p>
+            <p>{{ (a.content|striptags)[:180] }}{% if (a.content|striptags)|length > 180 %}…{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Пока нет статей.</p>
+    {% endif %}
+
+  {% endif %}
+{% endblock %}

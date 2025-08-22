@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-3">{{ 'Редактировать статью' if article else 'Новая статья' }}</h1>
+
+<form method="post" enctype="multipart/form-data">
+  <div class="field">
+    <label>Заголовок</label>
+    <input type="text" name="title" value="{{ article.title if article else '' }}" required>
+  </div>
+
+  <div class="field">
+    <label>Содержимое</label>
+    <textarea id="content" name="content">{{ article.content|safe if article else '' }}</textarea>
+  </div>
+
+  <div class="field">
+    <label>Доп. файлы (необязательно)</label>
+    <input type="file" name="files" multiple>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn primary">Сохранить</button>
+    <a class="btn" href="{{ url_for('subsection_detail', subsection_id=(article.subsection.id if article else subsection.id)) }}">Отмена</a>
+  </div>
+</form>
+
+<!-- TinyMCE (локально) -->
+<script src="{{ url_for('static', filename='vendor/tinymce/tinymce.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Высота топбара сайта для корректного прилипания тулбара TinyMCE
+    var topbar = document.querySelector('.topbar');
+    var stickyOffset = topbar ? topbar.getBoundingClientRect().height : 0;
+
+    tinymce.init({
+      selector: '#content',
+      language: 'ru',
+      language_url: '/static/vendor/tinymce/langs/ru.js',
+
+      // UI
+      menubar: 'insert format table view',
+      plugins: 'code link image media table lists advlist autolink paste preview',
+      toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | table | code | preview',
+      branding: false,
+      statusbar: true,
+      height: 1200,
+
+      // Прилипание панели инструментов
+      toolbar_sticky: true,
+      toolbar_sticky_offset: stickyOffset,
+
+      // Ссылки/пути
+      convert_urls: false,
+      relative_urls: false,
+      remove_script_host: true,
+
+      // Таблицы: расширенные вкладки + видимые границы по умолчанию
+      table_advtab: true,
+      table_cell_advtab: true,
+      table_row_advtab: true,
+      table_default_attributes: { border: '1' },
+      table_default_styles: { 'border-collapse': 'collapse' },
+
+      // Стили только внутри редактора (не влияют на страницу просмотра)
+      content_style: `
+        table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+        table, th, td { border: 1px solid #d0d7de; }
+        th, td { padding: 6px; vertical-align: top; }
+        td:empty::after, th:empty::after { content: "\\00a0"; } /* пустые ячейки не схлопываются */
+        img { max-width: 100%; height: auto; }
+      `,
+
+      // Картинки и вставка из Word
+      image_caption: true,
+      automatic_uploads: true,
+      paste_data_images: true,
+      images_upload_url: "{{ url_for('upload_media') }}",
+      images_upload_credentials: true,   // передаём cookies (авторизация)
+      file_picker_types: 'image media',
+      media_live_embeds: false,
+
+      // Универсальный загрузчик (поддерживает JSON с {url} или {location})
+		images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
+		const xhr = new XMLHttpRequest();
+		xhr.withCredentials = true;
+		xhr.open('POST', "{{ url_for('upload_media') }}");
+		xhr.upload.onprogress = (e) => { if (e.lengthComputable) progress(e.loaded / e.total * 100); };
+		xhr.onload = () => {
+			if (xhr.status < 200 || xhr.status >= 300) return reject('HTTP ' + xhr.status);
+			try {
+			const json = JSON.parse(xhr.responseText);
+			if (!json.location) return reject('Bad JSON');
+			resolve(json.location);
+			} catch(e) { reject('Parse error'); }
+		};
+		xhr.onerror = () => reject('XHR error');
+		const fd = new FormData();
+		fd.append('file', blobInfo.blob(), blobInfo.filename());
+		{% if article %}
+		fd.append('article_id', '{{ article.id }}');
+		{% endif %}
+		xhr.send(fd);
+		}),
+
+      // Обновляем смещение при ресайзе окна (если высота топбара меняется)
+      setup: (editor) => {
+        window.addEventListener('resize', () => {
+          var tb = document.querySelector('.topbar');
+          var off = tb ? tb.getBoundingClientRect().height : 0;
+          // У TinyMCE нет публичного метода смены offset на лету,
+          // но он пересчитает позицию при прокрутке; храним актуальное значение:
+          editor.settings.toolbar_sticky_offset = off;
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

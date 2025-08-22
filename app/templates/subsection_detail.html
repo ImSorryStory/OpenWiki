@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block breadcrumbs %}<nav class="breadcrumbs">
+  <a href="{{ url_for('index') }}">Главная</a><span class="sep">/</span>
+  <a href="{{ url_for('section_detail', section_id=subsection.section.id) }}">Раздел: {{ subsection.section.title }}</a><span class="sep">/</span>
+  <span class="current">Подраздел: {{ subsection.title }}</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="header-row">
+  <h2>Подраздел: {{ subsection.title }}</h2>
+  <div>
+    <a class="btn secondary" href="{{ url_for('edit_subsection', subsection_id=subsection.id) }}">Редактировать</a>
+    <a class="btn" href="{{ url_for('new_article', subsection_id=subsection.id) }}">+ Статья</a>
+  </div>
+</div>
+<p class="muted">{{ subsection.description }}</p>
+<form method="post" action="{{ url_for('delete_subsection', subsection_id=subsection.id) }}" style="display:inline">
+  <button class="btn danger" type="submit">Удалить подраздел</button>
+</form>
+{% if current_user and current_user.is_admin %}
+  <form method="post" action="{{ url_for('restore_subsection', subsection_id=subsection.id) }}" style="display:inline">
+    <button class="btn" type="submit">Восстановить</button>
+  </form>
+  <form method="post" action="{{ url_for('purge_subsection', subsection_id=subsection.id) }}" style="display:inline"
+        onsubmit="return confirm('Удалить подраздел окончательно? Действие необратимо.')">
+    <button class="btn ghost" type="submit">Удалить окончательно</button>
+  </form>
+{% endif %}
+
+{% if subsection.articles %}
+<table class="table">
+  <thead><tr><th>Статья</th><th>Последнее изменение</th><th>Автор</th></tr></thead>
+  <tbody>
+    {% for a in subsection.articles if not a.is_deleted %}
+    <tr>
+      <td><a href="{{ url_for('article_detail', article_id=a.id) }}">{{ a.title }}</a></td>
+      <td>{{ a.updated_at.strftime('%Y-%m-%d %H:%M') if a.updated_at else '-' }}</td>
+      <td>{{ a.updated_by_login or a.created_by_login }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Пока нет статей.</p>
+{% endif %}
+{% endblock %}
